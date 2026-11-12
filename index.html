@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADSO DevLab - Plataforma Integral de Evaluación y Entrenamiento SENA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        sena: {
+                            green: '#39A900',
+                            blue: '#00324D',
+                            dark: '#0A192F',
+                            card: '#112240',
+                            accent: '#64FFDA'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        code, pre, .font-mono { font-family: 'Fira Code', monospace; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-sena-dark dark:text-gray-100 min-h-screen transition-colors duration-200 flex flex-col">
+
+    <!-- HEADER / NAVIGATION -->
+    <header class="sticky top-0 z-40 bg-white/90 dark:bg-sena-dark/90 backdrop-blur border-b border-gray-200 dark:border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo & Brand -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-lg bg-sena-green flex items-center justify-center font-bold text-white text-xl shadow-lg shadow-sena-green/30">
+                        A
+                    </div>
+                    <div>
+                        <span class="font-bold text-lg tracking-tight block leading-none">ADSO DevLab</span>
+                        <span class="text-xs text-sena-green dark:text-sena-accent font-medium">Tecnólogo SENA (220501)</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs (Desktop) -->
+                <nav class="hidden md:flex space-x-1">
+                    <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition-all text-sena-green dark:text-sena-accent bg-sena-green/10 dark:bg-sena-accent/10">
+                        📊 Dashboard
+                    </button>
+                    <button onclick="switchTab('quiz')" id="tab-quiz" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition-all text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
+                        📝 Evaluación (Quiz)
+                    </button>
+                    <button onclick="switchTab('training')" id="tab-training" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition-all text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
+                        🚀 Plan de Entrenamiento
+                    </button>
+                    <button onclick="switchTab('assistant')" id="tab-assistant" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition-all text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
+                        💻 Probador & IA
+                    </button>
+                </nav>
+
+                <!-- Actions -->
+                <div class="flex items-center space-x-3">
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleTheme()" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:scale-105 transition-transform" title="Cambiar tema">
+                        <span id="theme-icon">🌙</span>
+                    </button>
+                    
+                    <!-- Reset Storage -->
+                    <button onclick="resetUserData()" class="p-2 rounded-lg bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20 text-xs font-semibold" title="Reiniciar Progreso">
+                        🗑️ Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div class="md:hidden border-t border-gray-200 dark:border-gray-800 px-2 py-2 flex justify-around bg-white dark:bg-sena-dark text-xs">
+            <button onclick="switchTab('dashboard')" class="mobile-nav-btn p-2 text-center text-sena-green">📊 Dashboard</button>
+            <button onclick="switchTab('quiz')" class="mobile-nav-btn p-2 text-center text-gray-500">📝 Quiz</button>
+            <button onclick="switchTab('training')" class="mobile-nav-btn p-2 text-center text-gray-500">🚀 Plan</button>
+            <button onclick="switchTab('assistant')" class="mobile-nav-btn p-2 text-center text-gray-500">💻 IA Console</button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- SIMULATOR DISCLAIMER BANNER -->
+        <div class="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-300 text-xs sm:text-sm flex items-start space-x-3 shadow-sm">
+            <span class="text-xl">⚠️</span>
+            <div>
+                <strong class="font-semibold">Simulador de Entrenamiento Formativo:</strong> Esta aplicación web es una herramienta didáctica de práctica autónoma para aprendices ADSO. Las calificaciones y reportes generados no corresponden a evaluaciones oficiales ni suplantan las evidencias registradas en LMS Territorium / SOFIA Plus por los instructores SENA.
+            </div>
+        </div>
+
+        <!-- VIEW 1: DASHBOARD DE PERFIL -->
+        <section id="view-dashboard" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- User Profile Card -->
+                <div class="bg-white dark:bg-sena-card p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-xs uppercase font-bold tracking-wider text-sena-green dark:text-sena-accent">Perfil del Aprendiz</span>
+                            <button onclick="editProfile()" class="text-xs text-blue-500 hover:underline">Editar</button>
+                        </div>
+                        <div class="flex items-center space-x-4 mb-4">
+                            <div class="w-14 h-14 rounded-full bg-sena-blue text-white flex items-center justify-center font-bold text-2xl border-2 border-sena-green">
+                                <span id="user-avatar">AP</span>
+                            </div>
+                            <div>
+                                <h2 id="user-name-display" class="font-bold text-lg leading-snug">Aprendiz ADSO</h2>
+                                <p id="user-ficha-display" class="text-xs text-gray-500 dark:text-gray-400">Ficha: 2879500 | Diurna</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-4 border-t border-gray-100 dark:border-gray-800 space-y-2">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-500 dark:text-gray-400">Quizzes Intentados:</span>
+                            <span id="stat-quizzes-count" class="font-semibold">0</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-500 dark:text-gray-400">Promedio General:</span>
+                            <span id="stat-avg-score" class="font-semibold text-sena-green">0%</span>
+                        </div>
+                        <button onclick="exportHistoryData()" class="w-full mt-2 py-2 px-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-xs font-medium rounded-lg text-gray-700 dark:text-gray-300 transition-colors">
+                            📥 Exportar Historial (JSON)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Global Performance Breakdown -->
+                <div class="md:col-span-2 bg-white dark:bg-sena-card p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                    <h3 class="font-bold text-base mb-4 flex items-center justify-between">
+                        <span>Rendimiento por Competencias Técnicas</span>
+                        <span class="text-xs font-normal text-gray-500 dark:text-gray-400">6 Normas NCL</span>
+                    </h3>
+                    <div id="competency-bars-container" class="space-y-3">
+                        <!-- Dynamic competence bars rendered here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz History Table -->
+            <div class="bg-white dark:bg-sena-card p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                <h3 class="font-bold text-base mb-4">Historial de Evaluaciones Recientes</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-gray-50 dark:bg-gray-800/50 text-gray-500 dark:text-gray-400 uppercase font-semibold">
+                            <tr>
+                                <th class="p-3">Fecha</th>
+                                <th class="p-3">Puntaje Global</th>
+                                <th class="p-3">Mejor Competencia</th>
+                                <th class="p-3">Mayor Brecha</th>
+                                <th class="p-3">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body" class="divide-y divide-gray-100 dark:divide-gray-800">
+                            <!-- Rows inserted dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 2: QUIZ POR COMPETENCIAS -->
+        <section id="view-quiz" class="hidden space-y-6">
+            <!-- Quiz Configuration & Header -->
+            <div id="quiz-intro-box" class="bg-white dark:bg-sena-card p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm text-center max-w-2xl mx-auto space-y-4">
+                <h2 class="text-2xl font-bold">Evaluación Integral ADSO</h2>
+                <p class="text-sm text-gray-600 dark:text-gray-300">
+                    Responde preguntas técnicas y resuelve análisis de fragmentos de código basados en las 6 normas de competencia del programa. Recibirás retroalimentación inmediata.
+                </p>
+                <div class="pt-4">
+                    <button onclick="startQuiz()" class="px-6 py-3 bg-sena-green text-white font-semibold rounded-xl shadow-lg shadow-sena-green/30 hover:bg-sena-green/90 transition-transform hover:scale-105">
+                        ▶️ Iniciar Evaluación
+                    </button>
+                </div>
+            </div>
+
+            <!-- Active Quiz Component -->
+            <div id="quiz-active-box" class="hidden max-w-3xl mx-auto bg-white dark:bg-sena-card rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xl overflow-hidden">
+                <!-- Progress Header -->
+                <div class="bg-gray-100 dark:bg-gray-800/80 p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center text-xs">
+                    <span id="quiz-progress-text" class="font-medium text-gray-600 dark:text-gray-300">Pregunta 1 de 6</span>
+                    <span id="quiz-competence-badge" class="px-2.5 py-1 rounded-full bg-sena-green/20 text-sena-green dark:text-sena-accent font-semibold">
+                        Código 220501092
+                    </span>
+                </div>
+
+                <!-- Question Body -->
+                <div class="p-6 space-y-6">
+                    <div>
+                        <h3 id="quiz-question-title" class="text-base sm:text-lg font-bold mb-3 leading-relaxed">
+                            Cargando pregunta...
+                        </h3>
+                        <div id="quiz-code-snippet" class="hidden my-3 p-4 bg-gray-900 text-gray-100 rounded-xl font-mono text-xs overflow-x-auto border border-gray-700">
+                            <!-- Code snippet rendering -->
+                        </div>
+                    </div>
+
+                    <!-- Options -->
+                    <div id="quiz-options-container" class="space-y-3">
+                        <!-- Options generated dynamically -->
+                    </div>
+
+                    <!-- Instant Technical Feedback -->
+                    <div id="quiz-feedback-box" class="hidden p-4 rounded-xl text-xs sm:text-sm border space-y-2">
+                        <!-- Instant feedback dynamic text -->
+                    </div>
+                </div>
+
+                <!-- Footer Navigation -->
+                <div class="p-4 bg-gray-50 dark:bg-gray-800/40 border-t border-gray-200 dark:border-gray-800 flex justify-end">
+                    <button id="quiz-next-btn" onclick="nextQuestion()" disabled class="px-5 py-2.5 bg-sena-blue text-white rounded-xl font-medium text-xs sm:text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-sena-blue/90">
+                        Siguiente Pregunta ➔
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quiz Results Screen -->
+            <div id="quiz-results-box" class="hidden max-w-3xl mx-auto bg-white dark:bg-sena-card p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xl space-y-6">
+                <div class="text-center space-y-2">
+                    <span class="text-4xl">🎉</span>
+                    <h2 class="text-2xl font-bold">Evaluación Completada</h2>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Resultados registrados en el historial local</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-6 p-6 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
+                    <div class="text-center">
+                        <span class="text-xs text-gray-500 uppercase font-semibold">Puntaje Global</span>
+                        <div id="res-score-number" class="text-4xl font-extrabold text-sena-green dark:text-sena-accent mt-1">0%</div>
+                    </div>
+                    <div class="h-12 w-px bg-gray-300 dark:bg-gray-700 hidden sm:block"></div>
+                    <div class="text-xs space-y-1 text-center sm:text-left">
+                        <p><strong>Aprobadas:</strong> <span id="res-correct-count">0</span> de <span id="res-total-count">6</span> preguntas</p>
+                        <p id="res-evaluation-msg" class="text-gray-600 dark:text-gray-300">Procesando diagnóstico...</p>
+                    </div>
+                </div>
+
+                <!-- Breakdown by Competence -->
+                <div class="space-y-3">
+                    <h4 class="font-bold text-sm">Desglose por Competencias ADSO:</h4>
+                    <div id="res-competence-breakdown" class="space-y-2">
+                        <!-- Generated breakdown -->
+                    </div>
+                </div>
+
+                <div class="flex justify-center space-x-4 pt-4">
+                    <button onclick="switchTab('training')" class="px-5 py-2.5 bg-sena-green text-white rounded-xl font-medium text-xs sm:text-sm hover:bg-sena-green/90">
+                        🚀 Ver Plan de Entrenamiento
+                    </button>
+                    <button onclick="startQuiz()" class="px-5 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-xl font-medium text-xs sm:text-sm hover:bg-gray-300">
+                        🔄 Repetir Quiz
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 3: PLAN DE ENTRENAMIENTO -->
+        <section id="view-training" class="hidden space-y-6">
+            <div class="bg-white dark:bg-sena-card p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-bold">Ruta de Aprendizaje Personalizada</h2>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Generada automáticamente a partir del diagnóstico de tus evaluaciones anteriores.</p>
+                </div>
+                <button onclick="generateCustomTrainingPlan()" class="px-4 py-2 bg-sena-blue text-white rounded-xl text-xs font-semibold hover:bg-sena-blue/90">
+                    🔄 Recalcular Plan
+                </button>
+            </div>
+
+            <!-- Recommendations Grid -->
+            <div id="training-plan-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Dynamic cards with recommended reinforcement topics -->
+            </div>
+        </section>
+
+        <!-- VIEW 4: PROBADOR DE CÓDIGO Y ASISTENTE IA -->
+        <section id="view-assistant" class="hidden space-y-6">
+            <!-- Security Warning Banner for API Key -->
+            <div class="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-300 text-xs space-y-1">
+                <div class="flex items-center space-x-2 font-bold">
+                    <span>🛡️ ADVERTENCIA DE SEGURIDAD (API KEY):</span>
+                </div>
+                <p>
+                    Ingresar una API Key directamente en el navegador la expone a inspección de red en el cliente. Para producción real, debe utilizarse un servidor proxy/backend intermediario. 
+                    <strong>Esta aplicación NUNCA guarda tu API Key en LocalStorage, SessionStorage ni Cookies.</strong> La clave vive únicamente en la memoria volátil mientras la pestaña esté abierta.
+                </p>
+            </div>
+
+            <!-- API Configuration Modal / Form -->
+            <div class="bg-white dark:bg-sena-card p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center space-x-3 w-full sm:w-auto">
+                    <span class="text-xs font-semibold">Modo de IA:</span>
+                    <select id="ia-mode-select" onchange="toggleIAMode()" class="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-medium">
+                        <option value="simulation">🤖 Simulación Local (Sin API Key)</option>
+                        <option value="openai">⚡ OpenAI Real (Fetch API Directo)</option>
+                    </select>
+                </div>
+
+                <div id="openai-key-container" class="hidden w-full sm:w-auto flex-1 max-w-md">
+                    <input type="password" id="openai-api-key-input" placeholder="sk-proj-..." class="w-full bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-sena-green" />
+                </div>
+            </div>
+
+            <!-- Split Interface: Code Execution Console + AI Assistant -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- LEFT: JS CODE TESTER CONSOLE -->
+                <div class="bg-white dark:bg-sena-card rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col h-[550px]">
+                    <div class="bg-gray-100 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                        <span class="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                            <span>⚡</span> Consola JS Vanilla (ES6+)
+                        </span>
+                        <div class="flex space-x-2">
+                            <button onclick="clearConsole()" class="px-2.5 py-1 text-xs bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300">Limpiar</button>
+                            <button onclick="runCode()" class="px-3 py-1 text-xs bg-sena-green text-white font-bold rounded shadow hover:bg-sena-green/90">▶ Ejecutar</button>
+                        </div>
+                    </div>
+
+                    <!-- Editor Textarea -->
+                    <div class="flex-1 p-3 bg-gray-950">
+                        <textarea id="code-editor" class="w-full h-full bg-transparent text-gray-100 font-mono text-xs focus:outline-none resize-none custom-scrollbar" spellcheck="false" placeholder="// Escribe código JavaScript aquí...
+// Ejemplo ADSO Competencia 220501096
+const aprendices = [
+  { nombre: 'Carlos', nota: 85 },
+  { nombre: 'Ana', nota: 92 }
+];
+
+const aprobados = aprendices.filter(a => a.nota >= 70);
+console.log('Aprendices Aprobados:', aprobados);"></textarea>
+                    </div>
+
+                    <!-- Output Console Window -->
+                    <div class="h-44 bg-black border-t border-gray-800 p-3 font-mono text-xs overflow-y-auto custom-scrollbar">
+                        <div class="text-gray-500 mb-1 border-b border-gray-800 pb-1 text-[10px]">-- Salida de Ejecución (Console.log) --</div>
+                        <div id="console-output" class="space-y-1">
+                            <span class="text-gray-600">// Haz clic en "Ejecutar" para probar el algoritmo</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: AI TUTOR & CODE ANALYZER -->
+                <div class="bg-white dark:bg-sena-card rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col h-[550px]">
+                    <div class="bg-gray-100 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                        <span class="text-xs font-bold uppercase tracking-wider text-sena-green dark:text-sena-accent flex items-center gap-2">
+                            <span>🧠</span> Asistente Técnico ADSO
+                        </span>
+                        <button onclick="askAIToAnalyzeCode()" class="px-3 py-1 text-xs bg-sena-blue text-white rounded hover:bg-sena-blue/90 font-medium">
+                            🔍 Analizar Código Actual
+                        </button>
+                    </div>
+
+                    <!-- Chat Message Area -->
+                    <div id="ai-chat-history" class="flex-1 p-4 overflow-y-auto space-y-3 custom-scrollbar text-xs">
+                        <div class="bg-gray-100 dark:bg-gray-800/60 p-3 rounded-xl max-w-[85%] border border-gray-200 dark:border-gray-700">
+                            <strong class="text-sena-green dark:text-sena-accent block mb-1">🤖 Asistente ADSO:</strong>
+                            ¡Hola! Soy tu tutor de desarrollo. Puedo ayudarte a resolver dudas sobre Requisitos (IEEE 830), Algoritmos, Diagramas UML, SQL, JS/POO, Pruebas y Despliegue. ¿Qué deseas consultar hoy?
+                        </div>
+                    </div>
+
+                    <!-- Input Bar -->
+                    <div class="p-3 bg-gray-50 dark:bg-gray-800/30 border-t border-gray-200 dark:border-gray-800 flex gap-2">
+                        <input type="text" id="ai-user-input" onkeypress="if(event.key==='Enter') sendAIMessage()" placeholder="Pregunta sobre la formación ADSO o solicita un reto..." class="flex-1 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-sena-green">
+                        <button onclick="sendAIMessage()" class="px-4 py-2 bg-sena-green text-white font-semibold rounded-xl text-xs hover:bg-sena-green/90">
+                            Enviar
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="mt-auto border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-sena-dark py-4 text-center text-xs text-gray-500 dark:text-gray-400">
+        <p>ADSO DevLab - Servicio Nacional de Aprendizaje (SENA) &copy; <span id="current-year"></span> | Tecnólogo en Análisis y Desarrollo de Software</p>
+    </footer>
+
+    <!-- LOGIC JS ENGINE -->
+    <script>
+        /* ==========================================================================
+           1. COMPETENCIAS OFICIALES Y BANCO DE PREGUNTAS (MODULO A)
+           ========================================================================== */
+        const ADSO_COMPETENCIES = {
+            "220501092": { name: "Requisitos del Software", code: "220501092" },
+            "220501093": { name: "Análisis y Lógica de Programación", code: "220501093" },
+            "220501095": { name: "Diseño de Software y Bases de Datos", code: "220501095" },
+            "220501096": { name: "Construcción y Codificación", code: "220501096" },
+            "220501098": { name: "Calidad y Pruebas de Software", code: "220501098" },
+            "220501097": { name: "Implantación y Despliegue", code: "220501097" }
+        };
+
+        const QUIZ_DATABASE = [
+            {
+                id: 1,
+                competence: "220501092",
+                question: "¿Cuál de las siguientes características corresponde a un Requisito No Funcional de calidad según el estándar IEEE 830?",
+                options: [
+                    "El sistema debe permitir registrar usuarios con rol Administrador.",
+                    "El tiempo de respuesta en la generación de reportes no debe exceder los 2 segundos con 500 usuarios concurrentes.",
+                    "El módulo debe emitir una factura electrónica en formato PDF.",
+                    "El usuario puede exportar sus datos en formato CSV."
+                ],
+                correct: 1,
+                explanation: "Los Requisitos No Funcionales (RNF) especifican atributos de calidad (rendimiento, seguridad, usabilidad), mientras que los Funcionales describen el comportamiento específico del sistema."
+            },
+            {
+                id: 2,
+                competence: "220501093",
+                question: "Analiza la siguiente estructura condicional en algoritmo. ¿Cuál será el resultado final impreso en consola?",
+                code: "let total = 10;\nfor(let i = 0; i < 3; i++) {\n  if(i % 2 === 0) {\n    total += i;\n  } else {\n    total -= 1;\n  }\n}\nconsole.log(total);",
+                options: [
+                    "9",
+                    "11",
+                    "10",
+                    "12"
+                ],
+                correct: 1,
+                explanation: "Iteración 0 (i=0, par): total = 10+0 = 10. Iteración 1 (i=1, impar): total = 10-1 = 9. Iteración 2 (i=2, par): total = 9+2 = 11. Salida: 11."
+            },
+            {
+                id: 3,
+                competence: "220501095",
+                question: "En el diseño de bases de datos relacionales, ¿qué regla define la Tercera Forma Normal (3FN)?",
+                options: [
+                    "Eliminar grupos repetidos creando tablas independientes.",
+                    "Garantizar que todos los atributos dependan totalmente de la Clave Primaria (no transitividad).",
+                    "Permitir la existencia de valores nulos en todas las columnas secundarias.",
+                    "Crear claves foráneas compuestas obligatoriamente."
+                ],
+                correct: 1,
+                explanation: "La 3FN requiere estar en 2FN y que ningún atributo que no sea clave dependa transitivamente de otra columna no clave. Todo atributo debe depender directamente de la PK."
+            },
+            {
+                id: 4,
+                competence: "220501096",
+                question: "Al trabajar con Programación Orientada a Objetos en JavaScript (ES6), ¿cuál es el resultado del siguiente bloque de código?",
+                code: "class Aprendiz {\n  constructor(nombre) {\n    this.nombre = nombre;\n  }\n}\nconst a1 = new Aprendiz('Laura');\nconsole.log(typeof Aprendiz);",
+                options: [
+                    "'object'",
+                    "'class'",
+                    "'function'",
+                    "'undefined'"
+                ],
+                correct: 2,
+                explanation: "En JavaScript ES6, las clases son azúcar sintáctico sobre el sistema de prototipos existente. Por lo tanto, typeof de una clase retorna 'function'."
+            },
+            {
+                id: 5,
+                competence: "220501098",
+                question: "¿Cuál es el objetivo principal de ejecutar Pruebas Unitarias dentro del marco SQA (Aseguramiento de Calidad)?",
+                options: [
+                    "Validar el rendimiento de la red bajo carga extrema.",
+                    "Verificar el correcto funcionamiento de un módulo o función aislado de forma independiente.",
+                    "Comprobar la aceptación final del software por parte del cliente final.",
+                    "Evaluar la experiencia de usuario (UX) en dispositivos móviles."
+                ],
+                correct: 1,
+                explanation: "Las pruebas unitarias se enfocan en aislar la unidad de código más pequeña examinable (funciones/métodos) para verificar su correcto comportamiento antes de la integración."
+            },
+            {
+                id: 6,
+                competence: "220501097",
+                question: "En un plan de implantación y despliegue de software, ¿a qué se refiere una estrategia de migración en 'Paralelo'?",
+                options: [
+                    "Apagar inmediatamente el sistema viejo y encender el nuevo.",
+                    "Ejecutar ambos sistemas (antiguo y nuevo) simultáneamente durante un periodo de prueba antes del cambio definitivo.",
+                    "Implantar el software únicamente en una sucursal piloto.",
+                    "Subir el código fuente a GitHub sin desplegar en servidor web."
+                ],
+                correct: 1,
+                explanation: "El despliegue en Paralelo mantiene operando el sistema antiguo y el nuevo al tiempo, garantizando continuidad de negocio y rollback seguro si ocurren fallas críticas."
+            }
+        ];
+
+        /* ==========================================================================
+           2. ESTADO GLOBAL Y PERSISTENCIA (MODULO D)
+           ========================================================================== */
+        const STORAGE_KEY = "ADSO_DEVLAB_USER_DATA_V1";
+
+        let appState = {
+            user: {
+                name: "Aprendiz ADSO",
+                ficha: "2879500"
+            },
+            quizHistory: [], // { date, score, breakdown }
+            competenceScores: {
+                "220501092": 0,
+                "220501093": 0,
+                "220501095": 0,
+                "220501096": 0,
+                "220501098": 0,
+                "220501097": 0
+            }
+        };
+
+        // API Key solo en memoria volátil
+        let activeOpenAIKey = "";
+
+        function loadStateFromStorage() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    appState = JSON.parse(saved);
+                }
+            } catch (e) {
+                console.error("Error cargando LocalStorage", e);
+            }
+        }
+
+        function saveStateToStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+                updateDashboardUI();
+            } catch (e) {
+                console.error("Error guardando LocalStorage", e);
+            }
+        }
+
+        function resetUserData() {
+            if (confirm("¿Estás seguro de restablecer todo tu historial y datos guardados?")) {
+                localStorage.removeItem(STORAGE_KEY);
+                appState = {
+                    user: { name: "Aprendiz ADSO", ficha: "2879500" },
+                    quizHistory: [],
+                    competenceScores: { "220501092": 0, "220501093": 0, "220501095": 0, "220501096": 0, "220501098": 0, "220501097": 0 }
+                };
+                saveStateToStorage();
+                alert("Datos restablecidos con éxito.");
+                location.reload();
+            }
+        }
+
+        function exportHistoryData() {
+            const cleanExport = {
+                aprendiz: appState.user,
+                fechaExportacion: new Date().toISOString(),
+                historialQuizzes: appState.quizHistory,
+                promediosCompetencias: appState.competenceScores
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(cleanExport, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `ADSO_Historial_${appState.user.name.replace(/\s+/g, '_')}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        /* ==========================================================================
+           3. UI DE NAVEGACIÓN Y TEMAS
+           ========================================================================== */
+        function switchTab(tabId) {
+            // Hide all views
+            ['dashboard', 'quiz', 'training', 'assistant'].forEach(v => {
+                document.getElementById(`view-${v}`).classList.add('hidden');
+                const btn = document.getElementById(`tab-${v}`);
+                if (btn) {
+                    btn.classList.remove('text-sena-green', 'dark:text-sena-accent', 'bg-sena-green/10', 'dark:bg-sena-accent/10');
+                    btn.classList.add('text-gray-600', 'dark:text-gray-400');
+                }
+            });
+
+            // Show target view
+            document.getElementById(`view-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('text-sena-green', 'dark:text-sena-accent', 'bg-sena-green/10', 'dark:bg-sena-accent/10');
+                activeBtn.classList.remove('text-gray-600', 'dark:text-gray-400');
+            }
+
+            if (tabId === 'training') generateCustomTrainingPlan();
+            if (tabId === 'dashboard') updateDashboardUI();
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                icon.textContent = '☀️';
+            } else {
+                html.classList.add('dark');
+                icon.textContent = '🌙';
+            }
+        }
+
+        function editProfile() {
+            const name = prompt("Nombre del Aprendiz:", appState.user.name);
+            const ficha = prompt("Número de Ficha ADSO:", appState.user.ficha);
+            if (name) appState.user.name = name;
+            if (ficha) appState.user.ficha = ficha;
+            saveStateToStorage();
+        }
+
+        /* ==========================================================================
+           4. LÓGICA DEL DASHBOARD DE RENDIMIENTO
+           ========================================================================== */
+        function updateDashboardUI() {
+            // Header Stats
+            document.getElementById('user-name-display').textContent = appState.user.name;
+            document.getElementById('user-ficha-display').textContent = `Ficha: ${appState.user.ficha} | ADSO`;
+            document.getElementById('user-avatar').textContent = appState.user.name.substring(0, 2).toUpperCase();
+
+            document.getElementById('stat-quizzes-count').textContent = appState.quizHistory.length;
+
+            // Recalculate average
+            if (appState.quizHistory.length > 0) {
+                const totalSum = appState.quizHistory.reduce((acc, q) => acc + q.score, 0);
+                const avg = Math.round(totalSum / appState.quizHistory.length);
+                document.getElementById('stat-avg-score').textContent = `${avg}%`;
+            } else {
+                document.getElementById('stat-avg-score').textContent = `0%`;
+            }
+
+            // Render Competence Progress Bars
+            const container = document.getElementById('competency-bars-container');
+            container.innerHTML = '';
+
+            Object.keys(ADSO_COMPETENCIES).forEach(code => {
+                const comp = ADSO_COMPETENCIES[code];
+                const score = appState.competenceScores[code] || 0;
+
+                const barWrapper = document.createElement('div');
+                barWrapper.className = "space-y-1";
+                barWrapper.innerHTML = `
+                    <div class="flex justify-between text-xs font-medium">
+                        <span class="truncate max-w-[70%]">${comp.code} - ${comp.name}</span>
+                        <span class="font-bold ${score >= 70 ? 'text-sena-green dark:text-sena-accent' : 'text-amber-500'}">${score}%</span>
+                    </div>
+                    <div class="w-full h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+                        <div class="h-full ${score >= 70 ? 'bg-sena-green' : 'bg-amber-500'} transition-all duration-500" style="width: ${score}%"></div>
+                    </div>
+                `;
+                container.appendChild(barWrapper);
+            });
+
+            // History Table
+            const tableBody = document.getElementById('history-table-body');
+            tableBody.innerHTML = '';
+
+            if (appState.quizHistory.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">No hay evaluaciones registradas aún. ¡Inicia tu primer Quiz!</td></tr>`;
+                return;
+            }
+
+            appState.quizHistory.slice(-5).reverse().forEach(item => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-gray-50 dark:hover:bg-gray-800/30";
+                row.innerHTML = `
+                    <td class="p-3">${new Date(item.date).toLocaleDateString()} ${new Date(item.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
+                    <td class="p-3 font-bold ${item.score >= 70 ? 'text-sena-green' : 'text-red-500'}">${item.score}%</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400 font-semibold">${item.bestComp || 'N/A'}</span></td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded bg-red-500/10 text-red-600 dark:text-red-400 font-semibold">${item.weakComp || 'N/A'}</span></td>
+                    <td class="p-3"><button onclick="switchTab('training')" class="text-blue-500 hover:underline">Ver Plan</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        /* ==========================================================================
+           5. LÓGICA DEL QUIZ INTERACTIVO (MODULO A)
+           ========================================================================== */
+        let currentQuizQuestions = [];
+        let currentQuestionIdx = 0;
+        let quizAnswers = []; // user answers
+
+        function startQuiz() {
+            currentQuizQuestions = [...QUIZ_DATABASE];
+            currentQuestionIdx = 0;
+            quizAnswers = [];
+
+            document.getElementById('quiz-intro-box').classList.add('hidden');
+            document.getElementById('quiz-results-box').classList.add('hidden');
+            document.getElementById('quiz-active-box').classList.remove('hidden');
+
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = currentQuizQuestions[currentQuestionIdx];
+            const comp = ADSO_COMPETENCIES[q.competence];
+
+            document.getElementById('quiz-progress-text').textContent = `Pregunta ${currentQuestionIdx + 1} de ${currentQuizQuestions.length}`;
+            document.getElementById('quiz-competence-badge').textContent = `${comp.code} | ${comp.name}`;
+            document.getElementById('quiz-question-title').textContent = q.question;
+
+            // Render code snippet if available
+            const codeBox = document.getElementById('quiz-code-snippet');
+            if (q.code) {
+                codeBox.textContent = q.code;
+                codeBox.classList.remove('hidden');
+            } else {
+                codeBox.classList.add('hidden');
+            }
+
+            // Options
+            const optionsContainer = document.getElementById('quiz-options-container');
+            optionsContainer.innerHTML = '';
+            document.getElementById('quiz-feedback-box').classList.add('hidden');
+            document.getElementById('quiz-next-btn').disabled = true;
+
+            q.options.forEach((optText, i) => {
+                const btn = document.createElement('button');
+                btn.className = "quiz-opt-btn w-full p-4 rounded-xl border border-gray-200 dark:border-gray-700 text-left text-xs sm:text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-all flex items-start space-x-3";
+                btn.onclick = () => selectOption(i);
+                btn.innerHTML = `
+                    <span class="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 flex items-center justify-center font-bold text-xs shrink-0">${String.fromCharCode(65 + i)}</span>
+                    <span class="pt-0.5">${optText}</span>
+                `;
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function selectOption(optIndex) {
+            const q = currentQuizQuestions[currentQuestionIdx];
+            const isCorrect = optIndex === q.correct;
+            quizAnswers[currentQuestionIdx] = { selected: optIndex, isCorrect, competence: q.competence };
+
+            // Disable all option buttons
+            const buttons = document.querySelectorAll('.quiz-opt-btn');
+            buttons.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) {
+                    btn.classList.add('bg-green-500/10', 'border-sena-green', 'text-sena-green', 'dark:text-sena-accent');
+                } else if (i === optIndex && !isCorrect) {
+                    btn.classList.add('bg-red-500/10', 'border-red-500', 'text-red-500');
+                }
+            });
+
+            // Show feedback box
+            const feedbackBox = document.getElementById('quiz-feedback-box');
+            feedbackBox.classList.remove('hidden', 'bg-green-500/10', 'border-green-500/30', 'text-green-800', 'dark:text-green-300', 'bg-red-500/10', 'border-red-500/30', 'text-red-800', 'dark:text-red-300');
+            
+            if (isCorrect) {
+                feedbackBox.classList.add('bg-green-500/10', 'border-green-500/30', 'text-green-800', 'dark:text-green-300');
+                feedbackBox.innerHTML = `<strong>✅ Explicación Técnica:</strong> ${q.explanation}`;
+            } else {
+                feedbackBox.classList.add('bg-red-500/10', 'border-red-500/30', 'text-red-800', 'dark:text-red-300');
+                feedbackBox.innerHTML = `<strong>❌ Respuesta Incorrecta:</strong> ${q.explanation}`;
+            }
+
+            document.getElementById('quiz-next-btn').disabled = false;
+        }
+
+        function nextQuestion() {
+            currentQuestionIdx++;
+            if (currentQuestionIdx < currentQuizQuestions.length) {
+                renderQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function finishQuiz() {
+            document.getElementById('quiz-active-box').classList.add('hidden');
+            document.getElementById('quiz-results-box').classList.remove('hidden');
+
+            const correctCount = quizAnswers.filter(a => a.isCorrect).length;
+            const totalCount = quizAnswers.length;
+            const scorePct = Math.round((correctCount / totalCount) * 100);
+
+            document.getElementById('res-score-number').textContent = `${scorePct}%`;
+            document.getElementById('res-correct-count').textContent = correctCount;
+            document.getElementById('res-total-count').textContent = totalCount;
+
+            const msgEl = document.getElementById('res-evaluation-msg');
+            if (scorePct >= 80) {
+                msgEl.textContent = "¡Excelente desempeño! Demuestras dominio sólido de las competencias analizadas.";
+            } else if (scorePct >= 60) {
+                msgEl.textContent = "Buen trabajo, pero se identifican áreas específicas que requieren refuerzo técnico.";
+            } else {
+                msgEl.textContent = "Se requiere revisar prioritariamente el plan de entrenamiento para nivelar conceptos clave.";
+            }
+
+            // Calculate competence scores for this attempt
+            const compStats = {};
+            Object.keys(ADSO_COMPETENCIES).forEach(code => { compStats[code] = { correct: 0, total: 0 }; });
+
+            quizAnswers.forEach(ans => {
+                if (ans.competence) {
+                    compStats[ans.competence].total++;
+                    if (ans.isCorrect) compStats[ans.competence].correct++;
+                }
+            });
+
+            // Render detailed result breakdown
+            const breakdownContainer = document.getElementById('res-competence-breakdown');
+            breakdownContainer.innerHTML = '';
+
+            let bestComp = "";
+            let bestVal = -1;
+            let weakComp = "";
+            let weakVal = 101;
+
+            Object.keys(compStats).forEach(code => {
+                const stat = compStats[code];
+                if (stat.total > 0) {
+                    const pct = Math.round((stat.correct / stat.total) * 100);
+                    appState.competenceScores[code] = pct; // update global state
+
+                    if (pct > bestVal) { bestVal = pct; bestComp = code; }
+                    if (pct < weakVal) { weakVal = pct; weakComp = code; }
+
+                    const item = document.createElement('div');
+                    item.className = "flex justify-between items-center text-xs p-2 bg-gray-100 dark:bg-gray-800 rounded-lg";
+                    item.innerHTML = `
+                        <span><strong>${code}</strong> - ${ADSO_COMPETENCIES[code].name}</span>
+                        <span class="font-bold ${pct >= 70 ? 'text-sena-green' : 'text-red-500'}">${pct}%</span>
+                    `;
+                    breakdownContainer.appendChild(item);
+                }
+            });
+
+            // Save Attempt to History
+            appState.quizHistory.push({
+                date: new Date().toISOString(),
+                score: scorePct,
+                bestComp: bestComp ? `${bestComp}` : 'N/A',
+                weakComp: weakComp ? `${weakComp}` : 'N/A'
+            });
+
+            saveStateToStorage();
+        }
+
+        /* ==========================================================================
+           6. MODULO B: PLAN DE ENTRENAMIENTO DINÁMICO
+           ========================================================================== */
+        const REINFORCEMENT_MAP = {
+            "220501092": {
+                title: "Refuerzo en Requisitos del Software (IEEE 830)",
+                modules: [
+                    "Elicitación mediante Entrevistas y Historias de Usuario.",
+                    "Clasificación de Requisitos Funcionales vs No Funcionales.",
+                    "Elaboración de Documentos SRS en estándar IEEE 830."
+                ],
+                exercise: "Escribe en el Asistente IA: 'Genera un plantilla de historia de usuario con criterios de aceptación'."
+            },
+            "220501093": {
+                title: "Refuerzo en Lógica y Algoritmos Cíclicos",
+                modules: [
+                    "Trazabilidad de Bucles (For, While, Do-While) y Matrices.",
+                    "Lógica Proposicional y Tablas de Verdad.",
+                    "Diagramas de Casos de Uso y Diagramas de Actividades UML."
+                ],
+                exercise: "Ejecuta en el probador de código un algoritmo que calcule la serie Fibonacci."
+            },
+            "220501095": {
+                title: "Refuerzo en Diseño de Bases de Datos & Arquitectura",
+                modules: [
+                    "Normalización de Bases de Datos (1FN, 2FN, 3FN).",
+                    "Diagramas de Clases POO y Modelos Entidad-Relación (DER).",
+                    "Patrón de Arquitectura MVC (Modelo-Vista-Controlador)."
+                ],
+                exercise: "Diseña la sentencia SQL DDL para crear una tabla Aprendiz con llaves foráneas."
+            },
+            "220501096": {
+                title: "Refuerzo en Construcción y Programación Orientada a Objetos",
+                modules: [
+                    "Métodos de Arrays ES6+ (map, filter, reduce, find).",
+                    "Principios POO (Encapsulamiento, Herencia, Polimorfismo).",
+                    "Consumo de Servicios Web REST con Fetch API."
+                ],
+                exercise: "Prueba en la consola JS una función asíncrona (async/await) simulada."
+            },
+            "220501098": {
+                title: "Refuerzo en Calidad y Pruebas de Software (SQA)",
+                modules: [
+                    "Diseño de Casos de Prueba Unitarios e Integración.",
+                    "Estándar ISO/IEC 25000 para evaluación de calidad.",
+                    "Bitácoras de lecciones aprendidas y reporte de bugs."
+                ],
+                exercise: "Redacta un caso de prueba para validar el formulario de login de una App."
+            },
+            "220501097": {
+                title: "Refuerzo en Despliegue e Implantación de Soluciones",
+                modules: [
+                    "Estrategias de Migración (Paralelo, Directa, Piloto).",
+                    "Planes de Copias de Seguridad y Manuales Técnicos.",
+                    "Entornos de Producción vs Staging y Pruebas de Aceptación."
+                ],
+                exercise: "Diseña la lista de chequeo para el pase a producción de una SPA."
+            }
+        };
+
+        function generateCustomTrainingPlan() {
+            const grid = document.getElementById('training-plan-grid');
+            grid.innerHTML = '';
+
+            Object.keys(ADSO_COMPETENCIES).forEach(code => {
+                const score = appState.competenceScores[code] || 0;
+                const info = REINFORCEMENT_MAP[code];
+
+                const card = document.createElement('div');
+                card.className = "bg-white dark:bg-sena-card p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between space-y-4";
+                
+                const isWeak = score < 70;
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="px-2.5 py-1 rounded-full text-xs font-bold ${isWeak ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-sena-green/10 text-sena-green'}">
+                                ${isWeak ? '⚠️ Prioridad de Refuerzo' : '✅ Nivel Adecuado'} (${score}%)
+                            </span>
+                            <span class="text-xs text-gray-500 font-mono">${code}</span>
+                        </div>
+                        <h3 class="font-bold text-base mb-2">${info.title}</h3>
+                        <ul class="text-xs space-y-1.5 text-gray-600 dark:text-gray-300 list-disc list-inside mb-4">
+                            ${info.modules.map(m => `<li>${m}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div class="pt-3 border-t border-gray-100 dark:border-gray-800 text-xs">
+                        <strong class="text-sena-green dark:text-sena-accent block mb-1">💡 Reto Práctico Recomendado:</strong>
+                        <p class="text-gray-500 dark:text-gray-400 italic">${info.exercise}</p>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        /* ==========================================================================
+           7. MODULO C: PROBADOR DE CÓDIGO JS Y ASISTENTE IA DUAL
+           ========================================================================== */
+        function runCode() {
+            const code = document.getElementById('code-editor').value;
+            const outputBox = document.getElementById('console-output');
+            outputBox.innerHTML = '';
+
+            // Override console.log temporarily
+            const originalLog = console.log;
+            const logs = [];
+
+            console.log = function(...args) {
+                logs.push(args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)).join(' '));
+                originalLog.apply(console, args);
+            };
+
+            try {
+                // Safe execution using Function constructor
+                const runner = new Function(code);
+                runner();
+
+                if (logs.length === 0) {
+                    outputBox.innerHTML = `<span class="text-gray-500">// El código se ejecutó correctamente sin salidas console.log()</span>`;
+                } else {
+                    logs.forEach(log => {
+                        const line = document.createElement('div');
+                        line.className = "text-green-400";
+                        line.textContent = `> ${log}`;
+                        outputBox.appendChild(line);
+                    });
+                }
+            } catch (err) {
+                outputBox.innerHTML = `<span class="text-red-400">❌ Error de Ejecución:\n${err.message}</span>`;
+            } finally {
+                console.log = originalLog; // Restore console.log
+            }
+        }
+
+        function clearConsole() {
+            document.getElementById('console-output').innerHTML = `<span class="text-gray-600">// Consola limpia</span>`;
+        }
+
+        function toggleIAMode() {
+            const mode = document.getElementById('ia-mode-select').value;
+            const keyBox = document.getElementById('openai-key-container');
+            if (mode === 'openai') {
+                keyBox.classList.remove('hidden');
+            } else {
+                keyBox.classList.add('hidden');
+            }
+        }
+
+        function sendAIMessage() {
+            const inputEl = document.getElementById('ai-user-input');
+            const promptText = inputEl.value.trim();
+            if (!promptText) return;
+
+            appendChatMessage("aprendiz", promptText);
+            inputEl.value = '';
+
+            const mode = document.getElementById('ia-mode-select').value;
+            if (mode === 'simulation') {
+                processSimulatedAI(promptText);
+            } else {
+                processRealOpenAI(promptText);
+            }
+        }
+
+        function askAIToAnalyzeCode() {
+            const code = document.getElementById('code-editor').value;
+            const promptText = `Por favor analiza el siguiente código JavaScript escrito por el aprendiz ADSO. Explica la sintaxis, identifica errores o mejoras:\n\`\`\`javascript\n${code}\n\`\`\``;
+            
+            appendChatMessage("aprendiz", "🔍 Analizar código del editor...");
+            
+            const mode = document.getElementById('ia-mode-select').value;
+            if (mode === 'simulation') {
+                processSimulatedAI(promptText);
+            } else {
+                processRealOpenAI(promptText);
+            }
+        }
+
+        function appendChatMessage(role, text) {
+            const history = document.getElementById('ai-chat-history');
+            const msgDiv = document.createElement('div');
+            
+            if (role === 'aprendiz') {
+                msgDiv.className = "bg-sena-green/10 border border-sena-green/20 p-3 rounded-xl max-w-[85%] ml-auto text-right text-xs";
+                msgDiv.innerHTML = `<strong class="text-sena-green block mb-1">👤 Tú (Aprendiz):</strong>${text.replace(/\n/g, '<br>')}`;
+            } else {
+                msgDiv.className = "bg-gray-100 dark:bg-gray-800/60 p-3 rounded-xl max-w-[85%] border border-gray-200 dark:border-gray-700 text-xs";
+                msgDiv.innerHTML = `<strong class="text-sena-green dark:text-sena-accent block mb-1">🤖 Asistente ADSO:</strong>${text.replace(/\n/g, '<br>')}`;
+            }
+            
+            history.appendChild(msgDiv);
+            history.scrollTop = history.scrollHeight;
+        }
+
+        function processSimulatedAI(userInput) {
+            const lower = userInput.toLowerCase();
+            let response = "";
+
+            if (lower.includes("requisito") || lower.includes("830")) {
+                response = "Respuesta Simulada (Requisitos): El estándar IEEE 830 recomienda estructurar el SRS en: Introducción, Descripción General y Requisitos Específicos. Recuerda diferenciar siempre Requisitos Funcionales (acciones) de los No Funcionales (calidad y restricciones).";
+            } else if (lower.includes("analizar código") || lower.includes("editor")) {
+                response = "Respuesta Simulada (Análisis de Código): El código analizado utiliza métodos modernos de ES6+. Estructura correcta, se recomienda validar casos borde donde los arreglos puedan estar vacíos para prevenir excepciones runtime.";
+            } else if (lower.includes("uml") || lower.includes("caso de uso")) {
+                response = "Respuesta Simulada (Análisis UML): Los diagramas de casos de uso representan las interacciones entre actores externos y el sistema. Recuerda utilizar las relaciones <<include>> (obligatoria) y <<extend>> (opcional).";
+            } else {
+                response = `Respuesta Simulada (Modo Offline ADSO): Entendido tu mensaje sobre "${userInput.substring(0, 30)}...". Para realizar consultas reales en vivo utilizando GPT-4o-mini, selecciona 'OpenAI Real' en el menú superior e ingresa tu API Key temporal.`;
+            }
+
+            setTimeout(() => {
+                appendChatMessage("bot", response);
+            }, 600);
+        }
+
+        async function processRealOpenAI(userInput) {
+            const keyInput = document.getElementById('openai-api-key-input').value.trim();
+            if (!keyInput) {
+                appendChatMessage("bot", "⚠️ Error: Por favor ingresa una API Key válida de OpenAI en el campo de texto superior.");
+                return;
+            }
+
+            // Almacenar en memoria volátil únicamente
+            activeOpenAIKey = keyInput;
+
+            appendChatMessage("bot", "⏳ Consultando modelo gpt-4o-mini de OpenAI...");
+
+            try {
+                const response = await fetch("https://api.openai.com/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${activeOpenAIKey}`
+                    },
+                    body: JSON.stringify({
+                        model: "gpt-4o-mini",
+                        messages: [
+                            {
+                                role: "system",
+                                content: "Eres el Asistente Técnico y Pedagógico Senior para aprendices del programa Tecnólogo en Análisis y Desarrollo de Software (ADSO) del SENA. Responde únicamente dudas técnicas de Requisitos (IEEE 830), Lógica/UML, Base de Datos, Programación JS/POO/SQL, Pruebas SQA y Despliegue de Software."
+                            },
+                            { role: "user", content: userInput }
+                        ],
+                        temperature: 0.7
+                    })
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.error?.message || "Error en la petición a OpenAI");
+                }
+
+                const data = await response.json();
+                const aiReply = data.choices[0].message.content;
+                appendChatMessage("bot", aiReply);
+
+            } catch (err) {
+                appendChatMessage("bot", `❌ Error al conectar con OpenAI API: ${err.message}`);
+            }
+        }
+
+        /* ==========================================================================
+           8. INICIALIZACIÓN DE LA APLICACIÓN
+           ========================================================================== */
+        window.onload = function() {
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+            loadStateFromStorage();
+            updateDashboardUI();
+        };
+    </script>
+</body>
+</html>
